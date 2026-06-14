@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AquaWatch — Water Quality Awareness Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --deep: #03111f;
+    --ocean: #062a45;
+    --teal: #0e7490;
+    --cyan: #22d3ee;
+    --foam: #a5f3fc;
+    --sand: #fef3c7;
+    --coral: #f97316;
+    --danger: #ef4444;
+    --warn: #eab308;
+    --safe: #22c55e;
+    --text: #e0f2fe;
+    --muted: #7dd3fc;
+    --glass: rgba(14,116,144,0.12);
+    --border: rgba(34,211,238,0.18);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--deep);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* === ANIMATED BACKGROUND === */
+  .bg-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .wave {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    border-radius: 40%;
+    opacity: 0.04;
+  }
+  .wave-1 { background: var(--cyan); top: -80%; left: -50%; animation: spin 40s linear infinite; }
+  .wave-2 { background: var(--teal); top: -60%; left: -20%; animation: spin 55s linear infinite reverse; }
+  .wave-3 { background: #0284c7; top: -90%; left: -30%; animation: spin 70s linear infinite; }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  /* === NAVBAR === */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 3rem;
+    background: rgba(3,17,31,0.85);
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--cyan);
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .logo span { color: var(--foam); }
+  .logo-dot { width: 8px; height: 8px; background: var(--cyan); border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.4); } }
+  
+  .nav-links { display: flex; gap: 2rem; align-items: center; }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--cyan); }
+  .nav-cta {
+    background: var(--teal);
+    color: #fff !important;
+    padding: 0.5rem 1.2rem;
+    border-radius: 6px;
+    font-size: 0.82rem !important;
+    transition: background 0.2s !important;
+  }
+  .nav-cta:hover { background: var(--cyan) !important; color: var(--deep) !important; }
+
+  /* === SECTIONS === */
+  section { position: relative; z-index: 1; }
+
+  /* === HERO === */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8rem 2rem 4rem;
+    flex-direction: column;
+  }
+
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(34,211,238,0.1);
+    border: 1px solid var(--border);
+    padding: 0.35rem 1rem;
+    border-radius: 100px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--cyan);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    animation: fadeUp 0.8s ease both;
+  }
+  .hero-tag::before { content: '◈'; font-size: 0.6rem; }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3.2rem, 8vw, 7rem);
+    font-weight: 900;
+    line-height: 1.0;
+    letter-spacing: -2px;
+    color: var(--text);
+    animation: fadeUp 0.9s 0.1s ease both;
+    max-width: 900px;
+  }
+  h1 em { font-style: normal; color: var(--cyan); }
+
+  .hero-sub {
+    max-width: 580px;
+    font-size: 1.15rem;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-top: 1.5rem;
+    animation: fadeUp 0.9s 0.2s ease both;
+    font-weight: 300;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2.5rem;
+    animation: fadeUp 0.9s 0.3s ease both;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--teal), #0369a1);
+    color: #fff;
+    padding: 0.85rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 24px rgba(14,116,144,0.4);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(14,116,144,0.6); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--cyan);
+    padding: 0.85rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .btn-ghost:hover { background: var(--glass); border-color: var(--cyan); }
+
+  /* Scroll indicator */
+  .scroll-hint {
+    margin-top: 4rem;
+    animation: fadeUp 1s 0.5s ease both;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--teal);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .scroll-line {
+    width: 1px;
+    height: 48px;
+    background: linear-gradient(to bottom, var(--teal), transparent);
+    animation: scrollDrop 2s ease-in-out infinite;
+  }
+  @keyframes scrollDrop { 0%,100% { transform: scaleY(1); opacity: 1; } 50% { transform: scaleY(0.5); opacity: 0.4; } }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* === METRICS STRIP === */
+  #metrics {
+    padding: 3rem 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: rgba(14,116,144,0.06);
+    overflow: hidden;
+  }
+  .metrics-track {
+    display: flex;
+    gap: 4rem;
+    animation: slide 30s linear infinite;
+    width: max-content;
+  }
+  @keyframes slide { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  .metric-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .metric-icon { font-size: 1.4rem; }
+  .metric-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: var(--cyan);
+  }
+  .metric-label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .metric-sep { color: var(--border); font-size: 1.5rem; }
+
+  /* === SECTION GENERIC === */
+  .section-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 6rem 2rem;
+  }
+  .section-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--teal);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .section-tag::before { content: ''; display: inline-block; width: 20px; height: 1px; background: var(--teal); }
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -1px;
+    margin-bottom: 1rem;
+  }
+  h2 em { font-style: normal; color: var(--cyan); }
+  .section-lead {
+    color: var(--muted);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    max-width: 560px;
+    font-weight: 300;
+  }
+
+  /* === CONTAMINANTS === */
+  #contaminants { background: linear-gradient(to bottom, transparent, rgba(14,116,144,0.05), transparent); }
+  .contam-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+  .contam-card {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.8rem;
+    transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+  }
+  .contam-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(34,211,238,0.04), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .contam-card:hover { transform: translateY(-4px); border-color: rgba(34,211,238,0.45); box-shadow: 0 16px 48px rgba(0,0,0,0.3); }
+  .contam-card:hover::before { opacity: 1; }
+  .contam-level {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.7rem;
+    border-radius: 100px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 1rem;
+  }
+  .level-high { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+  .level-med  { background: rgba(234,179,8,0.15);  color: #fbbf24; border: 1px solid rgba(234,179,8,0.3); }
+  .level-low  { background: rgba(34,197,94,0.15);  color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+  .contam-icon { font-size: 2rem; margin-bottom: 0.8rem; }
+  .contam-card h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--foam); }
+  .contam-card p { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+  .contam-bar { margin-top: 1.2rem; }
+  .bar-label { display: flex; justify-content: space-between; font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--muted); margin-bottom: 0.4rem; }
+  .bar-track { height: 4px; background: rgba(255,255,255,0.07); border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width 1.5s ease; }
+
+  /* === WATER CHECKER === */
+  #checker { background: rgba(14,116,144,0.06); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .checker-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: start;
+    margin-top: 3rem;
+  }
+  @media (max-width: 768px) { .checker-layout { grid-template-columns: 1fr; gap: 2rem; } }
+
+  .checker-form {
+    background: rgba(3,17,31,0.6);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+  }
+  .form-group { margin-bottom: 1.2rem; }
+  label {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 0.45rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+  }
+  input, select {
+    width: 100%;
+    background: rgba(14,116,144,0.1);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  input:focus, select:focus { border-color: var(--cyan); }
+  select option { background: var(--ocean); }
+
+  .range-group { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .range-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.1rem;
+    color: var(--cyan);
+    margin-top: 0.3rem;
+  }
+  input[type="range"] {
+    padding: 0;
+    height: 4px;
+    cursor: pointer;
+    accent-color: var(--cyan);
+  }
+
+  .analyze-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--teal), #0369a1);
+    color: #fff;
+    padding: 0.9rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border: none;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: opacity 0.2s, transform 0.2s;
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.02em;
+  }
+  .analyze-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  /* Result panel */
+  .result-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+  .result-card {
+    background: rgba(3,17,31,0.6);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.6rem;
+    transition: border-color 0.4s;
+  }
+  .result-card.active { border-color: rgba(34,211,238,0.5); }
+  .result-score {
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--cyan);
+    margin-bottom: 0.2rem;
+  }
+  .result-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; font-family: 'DM Mono', monospace; }
+  .result-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.9rem;
+    border-radius: 100px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-top: 0.6rem;
+  }
+  .status-safe { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+  .status-mod { background: rgba(234,179,8,0.15); color: #fbbf24; border: 1px solid rgba(234,179,8,0.3); }
+  .status-bad { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+  .params-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-top: 0.8rem;
+  }
+  .param-item {
+    background: rgba(14,116,144,0.1);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.7rem 0.9rem;
+  }
+  .param-name { font-size: 0.68rem; color: var(--muted); font-family: 'DM Mono', monospace; text-transform: uppercase; }
+  .param-value { font-size: 1rem; font-weight: 600; color: var(--foam); margin-top: 0.1rem; }
+  .param-unit { font-size: 0.68rem; color: var(--muted); }
+
+  /* === GLOBAL STATS === */
+  #stats-section { }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+  @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+  .stat-card {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 2rem 1.5rem;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: var(--cyan);
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+  .stat-num sup { font-size: 1.2rem; vertical-align: super; }
+  .stat-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+
+  /* Timeline */
+  .timeline-wrap { margin-top: 4rem; }
+  .timeline-wrap h3 { font-family: 'Playfair Display', serif; font-size: 1.6rem; margin-bottom: 2rem; }
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border-left: 2px solid var(--border);
+    padding-left: 2rem;
+    margin-left: 0.5rem;
+  }
+  .tl-item {
+    position: relative;
+    padding-bottom: 2rem;
+  }
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -2.4rem;
+    top: 0.3rem;
+    width: 10px; height: 10px;
+    background: var(--teal);
+    border-radius: 50%;
+    border: 2px solid var(--deep);
+    box-shadow: 0 0 0 3px rgba(14,116,144,0.3);
+  }
+  .tl-year { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--teal); letter-spacing: 0.1em; margin-bottom: 0.3rem; }
+  .tl-item h4 { font-size: 0.95rem; font-weight: 600; color: var(--foam); margin-bottom: 0.3rem; }
+  .tl-item p { font-size: 0.83rem; color: var(--muted); line-height: 1.6; }
+
+  /* === MAP SECTION === */
+  #water-map { background: rgba(14,116,144,0.04); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .map-container {
+    margin-top: 3rem;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    background: rgba(3,17,31,0.8);
+    padding: 2rem;
+  }
+  .wqi-legend {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .map-svg-wrap { position: relative; }
+  .world-map { width: 100%; height: auto; }
+  
+  /* Region cards */
+  .regions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  .region-card {
+    background: rgba(14,116,144,0.1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.1rem 1.3rem;
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: default;
+  }
+  .region-card:hover { border-color: rgba(34,211,238,0.4); transform: translateY(-2px); }
+  .region-name { font-size: 0.85rem; font-weight: 600; color: var(--foam); margin-bottom: 0.25rem; }
+  .region-wqi { display: flex; align-items: baseline; gap: 0.3rem; margin: 0.3rem 0; }
+  .region-wqi-val { font-family: 'DM Mono', monospace; font-size: 1.5rem; font-weight: 500; }
+  .region-wqi-label { font-size: 0.68rem; color: var(--muted); }
+  .region-badge { font-size: 0.68rem; font-family: 'DM Mono', monospace; padding: 0.2rem 0.55rem; border-radius: 100px; display: inline-block; margin-top: 0.2rem; }
+  .rb-excellent { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.25); }
+  .rb-good { background: rgba(132,204,22,0.15); color: #a3e635; border: 1px solid rgba(132,204,22,0.25); }
+  .rb-fair { background: rgba(234,179,8,0.15); color: #fbbf24; border: 1px solid rgba(234,179,8,0.25); }
+  .rb-poor { background: rgba(249,115,22,0.15); color: #fb923c; border: 1px solid rgba(249,115,22,0.25); }
+  .rb-bad  { background: rgba(239,68,68,0.15);  color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+
+  /* === TIPS === */
+  #tips {}
+  .tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+  .tip-card {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.8rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.25s, transform 0.25s;
+  }
+  .tip-card:hover { border-color: rgba(34,211,238,0.45); transform: translateY(-3px); }
+  .tip-num {
+    position: absolute;
+    top: 1.2rem; right: 1.5rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: rgba(34,211,238,0.06);
+    line-height: 1;
+    user-select: none;
+  }
+  .tip-icon { font-size: 1.8rem; margin-bottom: 1rem; }
+  .tip-card h3 { font-size: 1rem; font-weight: 600; color: var(--foam); margin-bottom: 0.5rem; }
+  .tip-card p { font-size: 0.83rem; color: var(--muted); line-height: 1.6; }
+
+  /* === CTA === */
+  #cta {
+    text-align: center;
+    padding: 7rem 2rem;
+    background: linear-gradient(to bottom, transparent, rgba(14,116,144,0.08), transparent);
+    border-top: 1px solid var(--border);
+  }
+  .cta-wrap { max-width: 700px; margin: 0 auto; }
+  .cta-glow {
+    display: inline-block;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: radial-gradient(var(--teal), transparent);
+    margin: 0 auto 2rem;
+    animation: pulse 3s ease-in-out infinite;
+    filter: blur(2px);
+  }
+  #cta h2 { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 1rem; }
+  #cta p { color: var(--muted); font-size: 1rem; line-height: 1.7; margin-bottom: 2rem; }
+  .email-row {
+    display: flex;
+    gap: 0;
+    max-width: 460px;
+    margin: 0 auto;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .email-row input {
+    flex: 1;
+    border: none;
+    border-radius: 0;
+    background: rgba(14,116,144,0.12);
+  }
+  .email-row button {
+    background: var(--teal);
+    color: #fff;
+    border: none;
+    padding: 0 1.5rem;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s;
+  }
+  .email-row button:hover { background: var(--cyan); color: var(--deep); }
+  .subscribe-msg { font-size: 0.78rem; color: var(--teal); margin-top: 0.7rem; min-height: 1.2em; font-family: 'DM Mono', monospace; }
+
+  /* === FOOTER === */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 3rem 3rem 2rem;
+    background: rgba(3,17,31,0.7);
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 3rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  @media (max-width: 768px) { .footer-grid { grid-template-columns: 1fr; gap: 2rem; } }
+  .footer-brand { }
+  .footer-logo { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 900; color: var(--cyan); margin-bottom: 0.8rem; }
+  .footer-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.6; max-width: 280px; }
+  .footer-col h4 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--foam); font-family: 'DM Mono', monospace; margin-bottom: 1rem; }
+  .footer-col a { display: block; font-size: 0.83rem; color: var(--muted); text-decoration: none; margin-bottom: 0.5rem; transition: color 0.2s; }
+  .footer-col a:hover { color: var(--cyan); }
+  .footer-bottom {
+    max-width: 1200px;
+    margin: 2rem auto 0;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    color: var(--teal);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* === OBSERVE INTERSECTIONS === */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* === RESPONSIVE === */
+  @media (max-width: 900px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    .section-wrap { padding: 4rem 1.5rem; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    footer { padding: 2rem 1.5rem; }
+    .footer-bottom { flex-direction: column; gap: 0.5rem; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Animated background -->
+<div class="bg-layer">
+  <div class="wave wave-1"></div>
+  <div class="wave wave-2"></div>
+  <div class="wave wave-3"></div>
+</div>
+
+<!-- Nav -->
+<nav>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    Aqua<span>Watch</span>
+  </div>
+  <div class="nav-links">
+    <a href="#contaminants">Contaminants</a>
+    <a href="#checker">WQ Checker</a>
+    <a href="#water-map">Global Map</a>
+    <a href="#stats-section">Statistics</a>
+    <a href="#tips">Conservation</a>
+    <a href="#cta" class="nav-cta">Get Alerts</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section id="hero">
+  <div class="hero-tag">Water Quality Awareness Portal — Est. 2025</div>
+  <h1>Clean Water is a <em>Human Right</em></h1>
+  <p class="hero-sub">Monitor, understand, and protect water quality worldwide. Real-time insights, contaminant tracking, and actionable conservation tips.</p>
+  <div class="hero-actions">
+    <a href="#checker" class="btn-primary">Check Water Quality</a>
+    <a href="#contaminants" class="btn-ghost">View Contaminants →</a>
+  </div>
+  <div class="scroll-hint">
+    <span>Scroll to explore</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- Metrics ticker -->
+<section id="metrics">
+  <div class="metrics-track" id="ticker">
+    <div class="metric-item"><span class="metric-icon">🌊</span><div><div class="metric-val">2.2B</div><div class="metric-label">People lack safe water</div></div></div>
+    <div class="metric-sep">·</div>
+    <div class="metric-item"><span class="metric-icon">💧</span><div><div class="metric-val">3.5M</div><div class="metric-label">Deaths annually from unsafe water</div></div></div>
+    <div class="metric-sep">·</div>
+    <div class="metric-item"><span class="metric-icon">🏭</span><div><div class="metric-val">80%</div><div class="metric-label">Wastewater discharged untreated</div></div></div>
+    <div class="metric-sep">·</div>
+    <div class="metric-item"><span class="metric-icon">🐟</span><div><div class="metric-val">40%</div><div class="metric-label">Rivers are polluted globally</div></div></div>
+    <div class="metric-sep">·</div>
+    <div class="metric-item"><span class="metric-icon">⚗️</span><div><div class="metric-val">700+</div><div class="metric-label">Contaminants in tap water</div></div></div>
+    <div class="metric-sep">·</div>
+    <div class="metric-item"><span class="metric-icon">🌍</span><div><div class="metric-val">4B</div><div class="metric-label">Experience water scarcity</div></div></div>
+    <div class="metric-sep">·</div>
+    <!-- duplicate for seamless loop -->
+    <div class="metric-item"><span class="metric-icon">🌊</span><div><div class="metric-val">2.2B</div><div class="metric-label">People lack safe water</div></div></div>
+    <div class="metric-sep">·</div>
+    <div class="metric-item"><span class="metric-icon">💧</span><div><div class="metric-val">3.5M</div><div class="metric-label">Deaths annually from unsafe water</div></div></div>
+    <div class="metric-sep">·</div>
+    <div class="metric-item"><span class="metric-icon">🏭</span><div><div class="metric-val">80%</div><div class="metric-label">Wastewater discharged untreated</div></div></div>
+    <div class="metric-sep">·</div>
+    <div class="metric-item"><span class="metric-icon">🐟</span><div><div class="metric-val">40%</div><div class="metric-label">Rivers are polluted globally</div></div></div>
+    <div class="metric-sep">·</div>
+    <div class="metric-item"><span class="metric-icon">⚗️</span><div><div class="metric-val">700+</div><div class="metric-label">Contaminants in tap water</div></div></div>
+    <div class="metric-sep">·</div>
+    <div class="metric-item"><span class="metric-icon">🌍</span><div><div class="metric-val">4B</div><div class="metric-label">Experience water scarcity</div></div></div>
+  </div>
+</section>
+
+<!-- Contaminants -->
+<section id="contaminants">
+  <div class="section-wrap">
+    <div class="section-tag">Water Contaminants</div>
+    <h2>What Lurks in <em>Your Water</em></h2>
+    <p class="section-lead">Common pollutants that affect drinking water quality, their health impacts, and acceptable concentration limits.</p>
+
+    <div class="contam-grid">
+      <div class="contam-card fade-in">
+        <div class="contam-level level-high">● High Risk</div>
+        <div class="contam-icon">🔩</div>
+        <h3>Lead (Pb)</h3>
+        <p>Leaches from old pipes and fixtures. Causes severe neurological damage in children; no safe level exists for developing brains.</p>
+        <div class="contam-bar">
+          <div class="bar-label"><span>WHO Limit: 0.01 mg/L</span><span>Danger Level: 0.05+ mg/L</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:88%;background:var(--danger)"></div></div>
+        </div>
+      </div>
+
+      <div class="contam-card fade-in">
+        <div class="contam-level level-high">● High Risk</div>
+        <div class="contam-icon">☣️</div>
+        <h3>Arsenic (As)</h3>
+        <p>Naturally occurring in groundwater. Long-term exposure linked to cancer, cardiovascular disease, and diabetes.</p>
+        <div class="contam-bar">
+          <div class="bar-label"><span>WHO Limit: 0.01 mg/L</span><span>Natural BG: 0.001 mg/L</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:72%;background:var(--danger)"></div></div>
+        </div>
+      </div>
+
+      <div class="contam-card fade-in">
+        <div class="contam-level level-med">● Medium Risk</div>
+        <div class="contam-icon">💊</div>
+        <h3>Nitrates (NO₃⁻)</h3>
+        <p>Agricultural runoff and sewage. Causes methemoglobinemia ("blue baby syndrome") in infants under 6 months.</p>
+        <div class="contam-bar">
+          <div class="bar-label"><span>WHO Limit: 50 mg/L</span><span>Risk: 90+ mg/L</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:55%;background:var(--warn)"></div></div>
+        </div>
+      </div>
+
+      <div class="contam-card fade-in">
+        <div class="contam-level level-high">● High Risk</div>
+        <div class="contam-icon">🧪</div>
+        <h3>PFAS / Forever Chemicals</h3>
+        <p>Industrial chemicals that accumulate in blood. Associated with cancer, hormone disruption, and immune system impairment.</p>
+        <div class="contam-bar">
+          <div class="bar-label"><span>EPA Limit: 4 ppt</span><span>Detected: 70+ ppt common</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:90%;background:var(--danger)"></div></div>
+        </div>
+      </div>
+
+      <div class="contam-card fade-in">
+        <div class="contam-level level-med">● Medium Risk</div>
+        <div class="contam-icon">🦠</div>
+        <h3>E. coli & Bacteria</h3>
+        <p>Fecal contamination indicator. Causes gastrointestinal illness, kidney failure, and can be fatal for immunocompromised individuals.</p>
+        <div class="contam-bar">
+          <div class="bar-label"><span>Safe Limit: 0 CFU/100mL</span><span>Risk: any detection</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:45%;background:var(--warn)"></div></div>
+        </div>
+      </div>
+
+      <div class="contam-card fade-in">
+        <div class="contam-level level-low">● Lower Risk</div>
+        <div class="contam-icon">🌫️</div>
+        <h3>Chlorine Byproducts</h3>
+        <p>Disinfection byproducts (THMs, HAAs) form when chlorine reacts with organic matter. Long-term exposure may increase cancer risk.</p>
+        <div class="contam-bar">
+          <div class="bar-label"><span>EPA Limit: 0.08 mg/L</span><span>Common: 0.02 mg/L</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:28%;background:var(--safe)"></div></div>
+        </div>
+      </div>
+
+      <div class="contam-card fade-in">
+        <div class="contam-level level-high">● High Risk</div>
+        <div class="contam-icon">⚡</div>
+        <h3>Mercury (Hg)</h3>
+        <p>Industrial discharge and coal burning. Accumulates in fish. Causes neurological damage, kidney failure, and reproductive harm.</p>
+        <div class="contam-bar">
+          <div class="bar-label"><span>WHO Limit: 0.006 mg/L</span><span>Danger: 0.01+ mg/L</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:65%;background:var(--danger)"></div></div>
+        </div>
+      </div>
+
+      <div class="contam-card fade-in">
+        <div class="contam-level level-med">● Medium Risk</div>
+        <div class="contam-icon">🔬</div>
+        <h3>Microplastics</h3>
+        <p>Fragments from plastic pollution detected in 94% of U.S. tap water. Potential endocrine disruption; research ongoing.</p>
+        <div class="contam-bar">
+          <div class="bar-label"><span>No official limit yet</span><span>Research ongoing</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:60%;background:var(--warn)"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Water Quality Checker -->
+<section id="checker">
+  <div class="section-wrap">
+    <div class="section-tag">WQ Analyzer</div>
+    <h2>Check Your Water <em>Quality</em></h2>
+    <p class="section-lead">Input water parameters to get an instant Water Quality Index (WQI) assessment and safety rating.</p>
+
+    <div class="checker-layout">
+      <div class="checker-form">
+        <div class="form-group">
+          <label>Water Source</label>
+          <select id="waterSource">
+            <option>Municipal tap water</option>
+            <option>Well / groundwater</option>
+            <option>River / surface water</option>
+            <option>Rainwater collection</option>
+            <option>Bottled water</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>pH Level</label>
+          <input type="range" id="phRange" min="0" max="14" step="0.1" value="7">
+          <div class="range-val" id="phVal">7.0 <span style="color:var(--muted);font-size:0.7rem">(Neutral)</span></div>
+        </div>
+        <div class="form-group">
+          <label>Turbidity (NTU)</label>
+          <input type="range" id="turbRange" min="0" max="50" step="0.5" value="1">
+          <div class="range-val" id="turbVal">1.0 NTU</div>
+        </div>
+        <div class="range-group">
+          <div class="form-group">
+            <label>TDS (mg/L)</label>
+            <input type="range" id="tdsRange" min="0" max="2000" step="10" value="300">
+            <div class="range-val" id="tdsVal">300 mg/L</div>
+          </div>
+          <div class="form-group">
+            <label>DO (mg/L)</label>
+            <input type="range" id="doRange" min="0" max="14" step="0.1" value="8">
+            <div class="range-val" id="doVal">8.0 mg/L</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Temperature (°C)</label>
+          <input type="range" id="tempRange" min="0" max="40" step="0.5" value="20">
+          <div class="range-val" id="tempVal">20.0 °C</div>
+        </div>
+        <div class="form-group">
+          <label>Nitrates (mg/L)</label>
+          <input type="range" id="nitrateRange" min="0" max="100" step="1" value="10">
+          <div class="range-val" id="nitrateVal">10 mg/L</div>
+        </div>
+        <button class="analyze-btn" onclick="analyzeWater()">▶ Analyze Water Quality</button>
+      </div>
+
+      <div class="result-panel">
+        <div class="result-card" id="scoreCard">
+          <div class="result-label">Water Quality Index</div>
+          <div class="result-score" id="wqiScore">—</div>
+          <div id="wqiStatus"></div>
+          <p style="font-size:0.82rem;color:var(--muted);margin-top:0.8rem;line-height:1.6" id="wqiNote">Fill in the parameters and click Analyze to see your water quality score.</p>
+        </div>
+        <div class="result-card" id="paramsCard">
+          <div class="result-label" style="margin-bottom:0.8rem">Parameter Breakdown</div>
+          <div class="params-grid" id="paramsGrid">
+            <div class="param-item"><div class="param-name">pH</div><div class="param-value" style="color:var(--muted)">—</div></div>
+            <div class="param-item"><div class="param-name">Turbidity</div><div class="param-value" style="color:var(--muted)">—</div></div>
+            <div class="param-item"><div class="param-name">TDS</div><div class="param-value" style="color:var(--muted)">—</div></div>
+            <div class="param-item"><div class="param-name">DO</div><div class="param-value" style="color:var(--muted)">—</div></div>
+            <div class="param-item"><div class="param-name">Temp</div><div class="param-value" style="color:var(--muted)">—</div></div>
+            <div class="param-item"><div class="param-name">Nitrates</div><div class="param-value" style="color:var(--muted)">—</div></div>
+          </div>
+        </div>
+        <div class="result-card" id="recCard">
+          <div class="result-label" style="margin-bottom:0.5rem">Recommendations</div>
+          <p id="recText" style="font-size:0.83rem;color:var(--muted);line-height:1.6">Recommendations will appear after analysis.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Global Map / Regions -->
+<section id="water-map">
+  <div class="section-wrap">
+    <div class="section-tag">Global Water Index</div>
+    <h2>Water Quality <em>Around the World</em></h2>
+    <p class="section-lead">WQI scores by region — aggregated from WHO, UNEP, and national water authorities.</p>
+
+    <div class="map-container fade-in">
+      <div class="wqi-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div> 90–100 Excellent</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#84cc16"></div> 70–89 Good</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#eab308"></div> 50–69 Fair</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div> 25–49 Poor</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div> 0–24 Very Poor</div>
+      </div>
+      <div class="regions-grid">
+        <div class="region-card">
+          <div class="region-name">🇮🇸 Iceland</div>
+          <div class="region-wqi"><div class="region-wqi-val" style="color:#22c55e">99</div><div class="region-wqi-label">WQI</div></div>
+          <div class="region-badge rb-excellent">Excellent</div>
+        </div>
+        <div class="region-card">
+          <div class="region-name">🇫🇮 Finland</div>
+          <div class="region-wqi"><div class="region-wqi-val" style="color:#22c55e">97</div><div class="region-wqi-label">WQI</div></div>
+          <div class="region-badge rb-excellent">Excellent</div>
+        </div>
+        <div class="region-card">
+          <div class="region-name">🇳🇴 Norway</div>
+          <div class="region-wqi"><div class="region-wqi-val" style="color:#22c55e">96</div><div class="region-wqi-label">WQI</div></div>
+          <div class="region-badge rb-excellent">Excellent</div>
+        </div>
+        <div class="region-card">
+          <div class="region-name">🇨🇭 Switzerland</div>
+          <div class="region-wqi"><div class="region-wqi-val" style="color:#22c55e">95</div><div class="region-wqi-label">WQI</div></div>
+          <div class="region-badge rb-excellent">Excellent</div>
+        </div>
+        <div class="region-card">
+          <div class="region-name">🇩🇪 Germany</div>
+          <div class="region-wqi"><div class="region-wqi-val" style="color:#84cc16">87</div><div class="region-wqi-label">WQI</div></div>
+          <div class="region-badge rb-good">Good</div>
+        </div>
+        <div class="region-card">
+          <div class="region-name">🇺🇸 USA (avg)</div>
+          <div class="region-wqi"><div class="region-wqi-val" style="color:#84cc16">78</div><div class="region-wqi-label">WQI</div></div>
+          <div class="region-badge rb-good">Good</div>
+        </div>
+        <div class="region-card">
+          <div class="region-name">🇧🇷 Brazil</div>
+          <div class="region-wqi"><div class="region-wqi-val" style="color:#eab308">62</div><div class="region-wqi-label">WQI</div></div>
+          <div class="region-badge rb-fair">Fair</div>
+        </div>
+        <div class="region-card">
+          <div class="region-name">🇮🇳 India (avg)</div>
+          <div class="region-wqi"><div class="region-wqi-val" style="color:#eab308">55</div><div class="region-wqi-label">WQI</div></div>
+          <div class="region-badge rb-fair">Fair</div>
+        </div>
+        <div class="region-card">
+          <div class="region-name">🇳🇬 Nigeria</div>
+          <div class="region-wqi"><div class="region-wqi-val" style="color:#f97316">38</div><div class="region-wqi-label">WQI</div></div>
+          <div class="region-badge rb-poor">Poor</div>
+        </div>
+        <div class="region-card">
+          <div class="region-name">🇧🇩 Bangladesh</div>
+          <div class="region-wqi"><div class="region-wqi-val" style="color:#f97316">31</div><div class="region-wqi-label">WQI</div></div>
+          <div class="region-badge rb-poor">Poor</div>
+        </div>
+        <div class="region-card">
+          <div class="region-name">🇨🇩 DR Congo</div>
+          <div class="region-wqi"><div class="region-wqi-val" style="color:#ef4444">22</div><div class="region-wqi-label">WQI</div></div>
+          <div class="region-badge rb-bad">Very Poor</div>
+        </div>
+        <div class="region-card">
+          <div class="region-name">🇸🇴 Somalia</div>
+          <div class="region-wqi"><div class="region-wqi-val" style="color:#ef4444">14</div><div class="region-wqi-label">WQI</div></div>
+          <div class="region-badge rb-bad">Very Poor</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Global Statistics -->
+<section id="stats-section">
+  <div class="section-wrap">
+    <div class="section-tag">By the Numbers</div>
+    <h2>The Global Water <em>Crisis</em></h2>
+    <p class="section-lead">Data-driven perspective on the scale and urgency of water quality challenges facing humanity.</p>
+
+    <div class="stats-grid">
+      <div class="stat-card fade-in">
+        <div class="stat-num">2.2<sup>B</sup></div>
+        <div class="stat-desc">People worldwide lack access to safely managed drinking water services</div>
+      </div>
+      <div class="stat-card fade-in">
+        <div class="stat-num">3.5<sup>M</sup></div>
+        <div class="stat-desc">Deaths annually attributed to waterborne diseases and contaminated water</div>
+      </div>
+      <div class="stat-card fade-in">
+        <div class="stat-num">80<sup>%</sup></div>
+        <div class="stat-desc">Of wastewater flows back into ecosystems without adequate treatment</div>
+      </div>
+      <div class="stat-card fade-in">
+        <div class="stat-num">6<sup>th</sup></div>
+        <div class="stat-desc">Rank of water crises in the World Economic Forum Global Risks Report</div>
+      </div>
+    </div>
+
+    <div class="timeline-wrap fade-in">
+      <h3>Key Milestones in Water Quality History</h3>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-year">1854</div>
+          <h4>The Broad Street Cholera Outbreak</h4>
+          <p>Dr. John Snow identified a contaminated water pump as the source of a cholera epidemic in London, founding modern epidemiology and linking water quality to public health.</p>
+        </div>
+        <div class="tl-item">
+          <div class="tl-year">1914</div>
+          <h4>First U.S. Drinking Water Standard</h4>
+          <p>The U.S. Public Health Service set the first federal bacteriological standard for drinking water — limited to water supplies used in interstate commerce.</p>
+        </div>
+        <div class="tl-item">
+          <div class="tl-year">1972</div>
+          <h4>Clean Water Act (U.S.)</h4>
+          <p>Established the basic structure for regulating pollutant discharges into the waters of the United States, transforming water quality regulation.</p>
+        </div>
+        <div class="tl-item">
+          <div class="tl-year">2010</div>
+          <h4>UN Recognizes Water as Human Right</h4>
+          <p>The United Nations General Assembly explicitly recognized the human right to water and sanitation, acknowledging clean water is essential for the full enjoyment of life.</p>
+        </div>
+        <div class="tl-item">
+          <div class="tl-year">2015</div>
+          <h4>UN Sustainable Development Goal 6</h4>
+          <p>SDG 6 sets global targets to ensure availability and sustainable management of water and sanitation for all by 2030.</p>
+        </div>
+        <div class="tl-item">
+          <div class="tl-year">2024</div>
+          <h4>EPA PFAS Maximum Contaminant Levels</h4>
+          <p>The U.S. EPA finalized the first-ever national drinking water standard for PFAS "forever chemicals," setting maximum contaminant levels as low as 4 parts per trillion.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Tips -->
+<section id="tips">
+  <div class="section-wrap">
+    <div class="section-tag">Take Action</div>
+    <h2>Water Conservation <em>Tips</em></h2>
+    <p class="section-lead">Simple, effective actions individuals and communities can take to protect and conserve water quality.</p>
+
+    <div class="tips-grid">
+      <div class="tip-card fade-in">
+        <div class="tip-num">01</div>
+        <div class="tip-icon">🚰</div>
+        <h3>Test Your Tap Water</h3>
+        <p>Use certified home testing kits or contact your local utility for Consumer Confidence Reports. Know what's actually in your water before treating it.</p>
+      </div>
+      <div class="tip-card fade-in">
+        <div class="tip-num">02</div>
+        <div class="tip-icon">🌱</div>
+        <h3>Reduce Chemical Runoff</h3>
+        <p>Choose native plants that require less fertilizer. Use organic alternatives and apply pesticides sparingly — excess chemicals leach into groundwater.</p>
+      </div>
+      <div class="tip-card fade-in">
+        <div class="tip-num">03</div>
+        <div class="tip-icon">♻️</div>
+        <h3>Dispose of Hazardous Waste Properly</h3>
+        <p>Never pour medications, motor oil, or household chemicals down drains. Use designated collection programs — these substances contaminate treatment systems.</p>
+      </div>
+      <div class="tip-card fade-in">
+        <div class="tip-num">04</div>
+        <div class="tip-icon">🪣</div>
+        <h3>Fix Leaks & Conserve</h3>
+        <p>A dripping faucet wastes up to 20 gallons per day. Fixing household leaks can save ~10% on your water bill and reduces pressure on water infrastructure.</p>
+      </div>
+      <div class="tip-card fade-in">
+        <div class="tip-num">05</div>
+        <div class="tip-icon">🏗️</div>
+        <h3>Support Green Infrastructure</h3>
+        <p>Advocate for permeable pavements, rain gardens, and green roofs in your community — these reduce storm water runoff that overwhelms treatment plants.</p>
+      </div>
+      <div class="tip-card fade-in">
+        <div class="tip-num">06</div>
+        <div class="tip-icon">📢</div>
+        <h3>Stay Informed & Advocate</h3>
+        <p>Attend public meetings, comment on permits, and vote on water-related policies. Water quality is a public health issue that requires community engagement.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="cta-wrap">
+    <div class="cta-glow"></div>
+    <h2>Stay Ahead of Water <em>Alerts</em></h2>
+    <p>Subscribe to receive notifications about water quality advisories, boil-water notices, and contamination alerts in your region.</p>
+    <div class="email-row">
+      <input type="email" id="emailInput" placeholder="Enter your email address">
+      <button onclick="subscribe()">Subscribe →</button>
+    </div>
+    <div class="subscribe-msg" id="subscribeMsg"></div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="footer-logo">AquaWatch</div>
+      <p class="footer-desc">A water quality awareness platform providing real-time insights, contaminant data, and conservation education to communities worldwide.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Learn</h4>
+      <a href="#contaminants">Contaminants</a>
+      <a href="#stats-section">Global Crisis</a>
+      <a href="#tips">Conservation</a>
+      <a href="#">Research Hub</a>
+    </div>
+    <div class="footer-col">
+      <h4>Tools</h4>
+      <a href="#checker">WQ Analyzer</a>
+      <a href="#water-map">Regional Data</a>
+      <a href="#">Download Reports</a>
+      <a href="#">API Access</a>
+    </div>
+    <div class="footer-col">
+      <h4>Organization</h4>
+      <a href="#">About AquaWatch</a>
+      <a href="#">Our Data Sources</a>
+      <a href="#">Partner NGOs</a>
+      <a href="#">Contact</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 AquaWatch Portal — Water Quality Awareness</span>
+    <span>Data: WHO · UNEP · EPA · UNICEF</span>
+  </div>
+</footer>
+
+<script>
+// === Range inputs live update ===
+function bindRange(id, display, suffix, getNote) {
+  const el = document.getElementById(id);
+  const dv = document.getElementById(display);
+  el.addEventListener('input', () => {
+    const v = parseFloat(el.value).toFixed(1);
+    dv.innerHTML = v + ' ' + suffix + (getNote ? ' <span style="color:var(--muted);font-size:0.7rem">' + getNote(parseFloat(el.value)) + '</span>' : '');
+  });
+}
+bindRange('phRange','phVal','', v => v < 6.5 ? '(Acidic)' : v > 8.5 ? '(Alkaline)' : '(Neutral)');
+bindRange('turbRange','turbVal','NTU');
+bindRange('tdsRange','tdsVal','mg/L');
+bindRange('doRange','doVal','mg/L');
+bindRange('tempRange','tempVal','°C');
+const nitrateEl = document.getElementById('nitrateRange');
+const nitrateValEl = document.getElementById('nitrateVal');
+nitrateEl.addEventListener('input', () => { nitrateValEl.textContent = nitrateEl.value + ' mg/L'; });
+
+// === WQI Calculator ===
+function analyzeWater() {
+  const ph = parseFloat(document.getElementById('phRange').value);
+  const turb = parseFloat(document.getElementById('turbRange').value);
+  const tds = parseFloat(document.getElementById('tdsRange').value);
+  const doVal = parseFloat(document.getElementById('doRange').value);
+  const temp = parseFloat(document.getElementById('tempRange').value);
+  const nitrate = parseFloat(document.getElementById('nitrateRange').value);
+
+  // Sub-index scores (0–100)
+  const phScore = ph >= 6.5 && ph <= 8.5 ? 100 - Math.abs(ph - 7) * 15 : 100 - Math.abs(ph - 7) * 25;
+  const turbScore = Math.max(0, 100 - turb * 4);
+  const tdsScore = tds <= 500 ? 100 : tds <= 1000 ? 80 : tds <= 1500 ? 50 : 20;
+  const doScore = doVal >= 8 ? 100 : doVal >= 6 ? 80 : doVal >= 4 ? 50 : 20;
+  const tempScore = temp >= 10 && temp <= 25 ? 100 - Math.abs(temp - 17) * 2 : 100 - Math.abs(temp - 17) * 5;
+  const nitrateScore = Math.max(0, 100 - nitrate * 2);
+
+  // Weighted WQI
+  const wqi = Math.round(
+    phScore * 0.2 +
+    turbScore * 0.15 +
+    tdsScore * 0.2 +
+    doScore * 0.2 +
+    tempScore * 0.1 +
+    nitrateScore * 0.15
+  );
+
+  const clamped = Math.min(100, Math.max(0, wqi));
+
+  // Display score
+  document.getElementById('wqiScore').textContent = clamped;
+  document.getElementById('scoreCard').classList.add('active');
+
+  let status, statusClass, note, rec;
+  if (clamped >= 90) {
+    status = '✓ Excellent'; statusClass = 'status-safe';
+    note = 'This water appears safe for drinking and all uses. Parameters are within optimal ranges.';
+    rec = 'No treatment needed. Continue regular monitoring. Ensure storage containers are clean and sealed.';
+  } else if (clamped >= 70) {
+    status = '~ Good'; statusClass = 'status-safe';
+    note = 'Water quality is good for most uses. Minor parameters may be slightly outside ideal range.';
+    rec = 'Consider a carbon filter for improved taste. Regular testing is recommended every 6 months.';
+  } else if (clamped >= 50) {
+    status = '⚠ Fair'; statusClass = 'status-mod';
+    note = 'Some parameters are outside optimal limits. Caution is advised for direct consumption.';
+    rec = 'Install a multi-stage filtration system. Avoid using for infant feeding without additional treatment. Boiling may help remove biological contaminants.';
+  } else if (clamped >= 25) {
+    status = '⚠ Poor'; statusClass = 'status-mod';
+    note = 'Multiple parameters are outside safe limits. This water should not be consumed without treatment.';
+    rec = 'Do not drink without treatment. Use reverse osmosis or distillation. Contact local water authority. Seek alternative sources for drinking and cooking.';
+  } else {
+    status = '✕ Very Poor'; statusClass = 'status-bad';
+    note = 'Water quality is critically poor. This water poses immediate health risks.';
+    rec = '⚠️ DO NOT USE for drinking or cooking. Seek bottled water immediately. Report to local health authorities. Professional remediation required.';
+  }
+
+  const statusEl = document.getElementById('wqiStatus');
+  statusEl.innerHTML = `<div class="result-status ${statusClass}">${status}</div>`;
+  document.getElementById('wqiNote').textContent = note;
+
+  // Params grid
+  const pColor = s => s >= 80 ? '#4ade80' : s >= 50 ? '#fbbf24' : '#f87171';
+  document.getElementById('paramsGrid').innerHTML = `
+    <div class="param-item"><div class="param-name">pH</div><div class="param-value" style="color:${pColor(phScore)}">${ph.toFixed(1)}</div><div class="param-unit">Score: ${Math.round(phScore)}</div></div>
+    <div class="param-item"><div class="param-name">Turbidity</div><div class="param-value" style="color:${pColor(turbScore)}">${turb.toFixed(1)}</div><div class="param-unit">NTU — ${Math.round(turbScore)}</div></div>
+    <div class="param-item"><div class="param-name">TDS</div><div class="param-value" style="color:${pColor(tdsScore)}">${tds}</div><div class="param-unit">mg/L — ${Math.round(tdsScore)}</div></div>
+    <div class="param-item"><div class="param-name">Dissolved O₂</div><div class="param-value" style="color:${pColor(doScore)}">${doVal.toFixed(1)}</div><div class="param-unit">mg/L — ${Math.round(doScore)}</div></div>
+    <div class="param-item"><div class="param-name">Temperature</div><div class="param-value" style="color:${pColor(tempScore)}">${temp.toFixed(1)}</div><div class="param-unit">°C — ${Math.round(tempScore)}</div></div>
+    <div class="param-item"><div class="param-name">Nitrates</div><div class="param-value" style="color:${pColor(nitrateScore)}">${nitrate}</div><div class="param-unit">mg/L — ${Math.round(nitrateScore)}</div></div>
+  `;
+
+  document.getElementById('recText').textContent = rec;
+  document.getElementById('paramsCard').classList.add('active');
+  document.getElementById('recCard').classList.add('active');
+}
+
+// === Subscribe ===
+function subscribe() {
+  const email = document.getElementById('emailInput').value;
+  const msg = document.getElementById('subscribeMsg');
+  if (!email || !email.includes('@')) {
+    msg.style.color = '#f87171';
+    msg.textContent = '✕ Please enter a valid email address.';
+    return;
+  }
+  msg.style.color = 'var(--cyan)';
+  msg.textContent = '✓ Subscribed! You\'ll receive water quality alerts for your region.';
+  document.getElementById('emailInput').value = '';
+}
+
+// === Intersection Observer for fade-in ===
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.12 });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
